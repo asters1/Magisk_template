@@ -1,0 +1,38 @@
+#!/sbin/sh
+
+#################
+# 初始化
+#################
+
+umask 022
+
+# 打印加载util_functions之前的显示
+ui_print() { echo "$1"; }
+
+require_new_magisk() {
+	ui_print "*******************************"
+	ui_print " Please install Magisk v20.4+! "
+	ui_print "*******************************"
+	exit 1
+}
+
+#########################
+# 默认即可
+#########################
+OUTFD=$2
+ZIPFILE=$3
+
+mount /data 2>/dev/null
+
+#假如这个文件不存在时，执行require_new_magisk
+[ -f /data/adb/magisk/util_functions.sh ] || require_new_magisk
+. /data/adb/magisk/util_functions.sh
+[ $MAGISK_VER_CODE -lt 20400 ] && require_new_magisk
+#############################
+#修改的地方
+#############################
+#
+#
+#
+#
+exit 0
