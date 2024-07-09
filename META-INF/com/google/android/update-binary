@@ -159,7 +159,7 @@ rm -rf \
 	$MODPATH/README.md $MODPATH/.git* 2>/dev/null
 
 ##############
-# Finalizing
+#结尾
 ##############
 
 cd /
