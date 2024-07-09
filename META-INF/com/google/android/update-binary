@@ -54,7 +54,7 @@ mount /data 2>/dev/null
 setup_flashable 2>/dev/null
 
 # Mount partitions
-mount_partitions 2>/dev/null
+# mount_partitions 2>/dev/null
 
 # Detect version and architecture
 api_level_arch_detect 2>/dev/null
