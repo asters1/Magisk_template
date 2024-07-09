@@ -6,6 +6,9 @@
 
 umask 022
 
+TMPDIR=/dev/tmp
+PERSISTDIR=/sbin/.magisk/mirror/persist
+
 # 打印加载util_functions之前的显示
 ui_print() { echo "$1"; }
 
@@ -16,8 +19,55 @@ require_new_magisk() {
 	exit 1
 }
 
+#检查zip压缩包内是否有install.sh,有则返回0，无则返回1
+is_legacy_script() {
+	unzip -l "$ZIPFILE" install.sh | grep -q install.sh
+	return $?
+}
+
+#打印模块信息
+print_modname() {
+	ui_print "*******************"
+	ui_print "模块:"
+	ui_print "作者:"
+	ui_print "*******************"
+}
+clear_mod_path() {
+	rm -rf $MODPATH 2>/dev/null
+	mkdir -p $MODPATH
+}
+mod_install() {
+	if is_legacy_script; then
+		#将$ZIPFILE里的文件解压到$TMPDIR
+		unzip -oj "$ZIPFILE" module.prop install.sh uninstall.sh 'common/*' -d $TMPDIR >&2
+		# 在当前环境中执行install.sh
+		. $TMPDIR/install.sh
+		print_modname
+
+		#复制uninstall.sh
+		[ -f $TMPDIR/uninstall.sh ] && cp -af $TMPDIR/uninstall.sh $MODPATH/uninstall.sh
+
+		#跳过挂载
+		$SKIPMOUNT && touch $MODPATH/skip_mount
+
+		#复制system.prop
+		$PROPFILE && cp -af $TMPDIR/system.prop $MODPATH/system.prop
+
+		#复制module.prop
+		cp -af $TMPDIR/module.prop $MODPATH/module.prop
+
+		#复制post-fs-data.sh
+		$POSTFSDATA && cp -af $TMPDIR/post-fs-data.sh $MODPATH/post-fs-data.sh
+
+		#复制service.sh
+		$LATESTARTSERVICE && cp -af $TMPDIR/service.sh $MODPATH/service.sh
+
+	fi
+
+}
+
 #########################
-# 默认即可
+# 默认即可, 全局变量
 #########################
 OUTFD=$2
 ZIPFILE=$3
@@ -28,11 +78,25 @@ mount /data 2>/dev/null
 [ -f /data/adb/magisk/util_functions.sh ] || require_new_magisk
 . /data/adb/magisk/util_functions.sh
 [ $MAGISK_VER_CODE -lt 20400 ] && require_new_magisk
-#############################
-#修改的地方
-#############################
-#
-#
-#
-#
+
+###########################################
+#初始化MOD变量
+###########################################
+MODDIRNAME="modules"
+MODULEROOT=$NVBASE/$MODDIRNAME
+MODID=$(grep_prop id $TMPDIR/module.prop)
+MODPATH=$MODULEROOT/$MODID
+MODNAME=$(grep_prop name $TMPDIR/module.prop)
+###########################################
+#修改的地方,只要把文件放到指定目录，即可!
+###########################################
+
+mod_install
+
+################END###########
+cd /
+$BOOTMODE || recovery_cleanup
+rm -rf $TMPDIR
+
+ui_print "Done!"
 exit 0

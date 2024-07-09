@@ -58,10 +58,9 @@ LATESTARTSERVICE=false
 # 设置安装你的mod时你想显示的内容
 
 print_modname() {
-	ui_print "*******************************"
-	ui_print "     	Magisk Module:         "
-	ui_print "For HMNote4X    By 小白杨"
-	ui_print "*******************************"
+	# ui_print "*******************************"
+	# ui_print "     	Magisk Module:         "
+	# ui_print "*******************************"
 }
 
 ######################################
