@@ -37,32 +37,27 @@ clear_mod_path() {
 	mkdir -p $MODPATH
 }
 mod_install() {
-	if is_legacy_script; then
-		#将$ZIPFILE里的文件解压到$TMPDIR
-		unzip -oj "$ZIPFILE" module.prop install.sh uninstall.sh 'common/*' -d $TMPDIR >&2
-		# 在当前环境中执行install.sh
-		. $TMPDIR/install.sh
-		print_modname
+	# 在当前环境中执行install.sh
+	. $TMPDIR/install.sh
+	print_modname
 
-		#复制uninstall.sh
-		[ -f $TMPDIR/uninstall.sh ] && cp -af $TMPDIR/uninstall.sh $MODPATH/uninstall.sh
+	#复制uninstall.sh
+	[ -f $TMPDIR/uninstall.sh ] && cp -af $TMPDIR/uninstall.sh $MODPATH/uninstall.sh
 
-		#跳过挂载
-		$SKIPMOUNT && touch $MODPATH/skip_mount
+	#跳过挂载
+	$SKIPMOUNT && touch $MODPATH/skip_mount
 
-		#复制system.prop
-		$PROPFILE && cp -af $TMPDIR/system.prop $MODPATH/system.prop
+	#复制system.prop
+	$PROPFILE && cp -af $TMPDIR/system.prop $MODPATH/system.prop
 
-		#复制module.prop
-		cp -af $TMPDIR/module.prop $MODPATH/module.prop
+	#复制module.prop
+	cp -af $TMPDIR/module.prop $MODPATH/module.prop
 
-		#复制post-fs-data.sh
-		$POSTFSDATA && cp -af $TMPDIR/post-fs-data.sh $MODPATH/post-fs-data.sh
+	#复制post-fs-data.sh
+	$POSTFSDATA && cp -af $TMPDIR/post-fs-data.sh $MODPATH/post-fs-data.sh
 
-		#复制service.sh
-		$LATESTARTSERVICE && cp -af $TMPDIR/service.sh $MODPATH/service.sh
-
-	fi
+	#复制service.sh
+	$LATESTARTSERVICE && cp -af $TMPDIR/service.sh $MODPATH/service.sh
 
 }
 
@@ -78,6 +73,9 @@ mount /data 2>/dev/null
 [ -f /data/adb/magisk/util_functions.sh ] || require_new_magisk
 . /data/adb/magisk/util_functions.sh
 [ $MAGISK_VER_CODE -lt 20400 ] && require_new_magisk
+
+#将$ZIPFILE里的文件解压到$TMPDIR
+unzip -oj "$ZIPFILE" module.prop install.sh uninstall.sh 'common/*' -d $TMPDIR >&2
 
 ###########################################
 #初始化MOD变量
